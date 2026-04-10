@@ -1,0 +1,138 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/app/context/useAuth';
+
+export default function LoginPage() {
+  const router = useRouter();
+  const { login } = useAuth();
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleLogin = async () => {
+    try {
+      setLoading(true);
+      setError('');
+
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000';
+
+      const response = await fetch(`${apiUrl}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email,
+          password
+        })
+      });
+
+      const contentType = response.headers.get('content-type') ?? '';
+      const data = contentType.includes('application/json')
+        ? await response.json()
+        : await response.text();
+
+      if (!response.ok) {
+        throw new Error(
+          typeof data === 'string'
+            ? data
+            : data?.message || 'Connexion impossible.'
+        );
+      }
+
+      login(data.token, {
+        clientId: data.clientId,
+        fullName: data.fullName,
+        email: data.email,
+        hasActiveSubscription: data.hasActiveSubscription,
+        remainingSessions: data.remainingSessions,
+        subscriptionType: data.subscriptionType,
+        hasUsedFreeTrial: data.hasUsedFreeTrial,
+        activeSubscriptions: data.activeSubscriptions ?? []
+      });
+
+      router.push('/reservation/calendrier');
+      router.refresh();
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : 'Une erreur est survenue.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <section className="page-content">
+      <div className="container">
+        <div
+          className="card"
+          style={{
+            maxWidth: 520,
+            margin: '0 auto',
+            display: 'grid',
+            gap: 12
+          }}
+        >
+          <h1>Connexion</h1>
+
+          <p className="section-copy">
+            Connectez-vous pour réserver vos cours et gérer votre abonnement.
+          </p>
+
+          {error && (
+            <div
+              style={{
+                padding: '0.9rem 1rem',
+                borderRadius: 12,
+                background: 'rgba(255, 90, 90, 0.12)',
+                border: '1px solid rgba(255, 90, 90, 0.28)'
+              }}
+            >
+              {error}
+            </div>
+          )}
+
+          <input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Courriel"
+            style={fieldStyle}
+          />
+
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Mot de passe"
+            style={fieldStyle}
+          />
+
+          <button
+            className="button"
+            type="button"
+            onClick={handleLogin}
+            disabled={loading}
+          >
+            {loading ? 'Connexion...' : 'Se connecter'}
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const fieldStyle: React.CSSProperties = {
+  width: '100%',
+  minHeight: 54,
+  borderRadius: 16,
+  border: '1px solid rgba(159,223,224,0.18)',
+  background: 'var(--surface-2)',
+  color: 'var(--text)',
+  padding: '0 1rem',
+  fontSize: 20
+};

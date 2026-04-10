@@ -1,0 +1,4 @@
+Updated:
+- primary accent changed back to pale turquoise instead of green
+- menu and button typography increased to 23px / 1.4em / 700
+- button and dropdown borders now follow the border-color pattern you pointed out

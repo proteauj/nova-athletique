@@ -1,0 +1,62 @@
+:root {
+  --background: #050708;
+  --surface: #0b1011;
+  --surface-2: #11191b;
+  --text: #f6f8f8;
+  --muted: #b8c4c6;
+  --border: #1a2b2d;
+
+  /* Nova-inspired pale turquoise */
+  --accent: #9fdfe0;
+  --accent-2: #c4f1f2;
+
+  /* button/border tokens */
+  --button-bg: var(--accent);
+  --button-border: transparent;
+  --button-text: #071011;
+  --button-outline-border: var(--accent);
+  --button-outline-text: var(--text);
+
+  --max-width: 1200px;
+  --radius: 18px;
+  --shadow: 0 14px 40px rgba(0,0,0,0.32);
+}
+
+/* Styles de base utilisant le thème */
+body {
+  font-family: var(--font-primary) !important;
+  color: var(--primary) !important;
+  background-color: var(--secondary) !important;
+}
+
+a {
+  color: var(--primary) !important;
+  text-decoration: none !important;
+}
+
+a:hover {
+  color: var(--accent) !important;
+  text-decoration: underline !important;
+}
+
+button {
+  background-color: var(--accent) !important;
+  color: var(--secondary) !important;
+  border: none !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 0.25rem !important;
+  cursor: pointer !important;
+}
+
+button:hover {
+  opacity: 0.9 !important;
+}
+
+/* Styles pour les éléments de navigation */
+nav ul li a {
+  color: var(--primary) !important;
+}
+
+nav ul li a:hover {
+  color: var(--accent) !important;
+}
