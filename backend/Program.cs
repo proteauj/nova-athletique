@@ -51,7 +51,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-    
+
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<GoogleCalendarService>();
@@ -62,15 +62,16 @@ builder.Services.AddScoped<BookingAccessService>();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("frontend", policy =>
+    options.AddPolicy("Frontend", policy =>
     {
         policy
             .WithOrigins(
                 "http://localhost:3000",
-                "https://localhost:3000"
+                "https://nova-athletique-nova-athletique.vercel.app"
             )
             .AllowAnyHeader()
-            .AllowAnyMethod();
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
@@ -82,7 +83,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors("frontend");
+app.UseRouting();
+
+app.UseCors("Frontend");
 
 app.UseAuthentication();
 app.UseAuthorization();

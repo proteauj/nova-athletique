@@ -1,12 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NovaAthletique.Api.Data;
 using NovaAthletique.Api.Services;
 using NovaAthletique.Api.Models;
 using System.IdentityModel.Tokens.Jwt;
-using System.Threading.Tasks;
 
 namespace NovaAthletique.Api.Controllers;
 
@@ -27,6 +25,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
         var client = await _db.Clients
+            .Include(c => c.Subscriptions)
             .FirstOrDefaultAsync(c => c.Email == request.Email);
 
         if (client is null)
@@ -37,16 +36,37 @@ public class AuthController : ControllerBase
 
         var token = _jwtService.GenerateToken(client);
 
+        var activeSubscriptions = client.Subscriptions
+            .Where(s => s.IsActive &&
+                        s.CurrentPeriodStartUtc <= DateTime.UtcNow &&
+                        s.CurrentPeriodEndUtc >= DateTime.UtcNow)
+            .Select(s => new
+            {
+                id = s.Id,
+                isActive = s.IsActive,
+                remainingSessions = s.RemainingSessions,
+                subscriptionType = s.SubscriptionType,
+                includesSpecializedCourses = s.IncludesSpecializedCourses,
+                expiresAt = s.CurrentPeriodEndUtc
+            })
+            .ToList();
+
+        var primary = activeSubscriptions.FirstOrDefault();
+
         return Ok(new
         {
             token,
             client = new
             {
-                client.Id,
-                client.Email,
-                client.FullName,
-                client.SubscriptionType,
-                client.HasSpecializedAccess
+                id = client.Id,
+                email = client.Email,
+                fullName = client.FullName,
+                hasActiveSubscription = activeSubscriptions.Any(),
+                remainingSessions = primary?.remainingSessions ?? 0,
+                subscriptionType = primary?.subscriptionType,
+                hasUsedFreeTrial = client.HasUsedFreeTrial,
+                hasSpecializedAccess = activeSubscriptions.Any(s => s.includesSpecializedCourses),
+                activeSubscriptions
             }
         });
     }
@@ -56,6 +76,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Me()
     {
         var sub = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+
         if (string.IsNullOrWhiteSpace(sub) || !Guid.TryParse(sub, out var clientId))
             return Unauthorized();
 
@@ -67,7 +88,9 @@ public class AuthController : ControllerBase
             return Unauthorized();
 
         var activeSubscriptions = client.Subscriptions
-            .Where(s => s.IsActive && s.StartDate <= DateTime.UtcNow && (s.EndDate == null || s.EndDate >= DateTime.UtcNow))
+            .Where(s => s.IsActive &&
+                        s.CurrentPeriodStartUtc <= DateTime.UtcNow &&
+                        s.CurrentPeriodEndUtc >= DateTime.UtcNow)
             .Select(s => new
             {
                 id = s.Id,
@@ -75,7 +98,7 @@ public class AuthController : ControllerBase
                 remainingSessions = s.RemainingSessions,
                 subscriptionType = s.SubscriptionType,
                 includesSpecializedCourses = s.IncludesSpecializedCourses,
-                expiresAt = s.EndDate
+                expiresAt = s.CurrentPeriodEndUtc
             })
             .ToList();
 
