@@ -6,11 +6,9 @@
   --muted: #b8c4c6;
   --border: #1a2b2d;
 
-  /* Nova-inspired pale turquoise */
   --accent: #9fdfe0;
   --accent-2: #c4f1f2;
 
-  /* button/border tokens */
   --button-bg: var(--accent);
   --button-border: transparent;
   --button-text: #071011;
@@ -19,44 +17,43 @@
 
   --max-width: 1200px;
   --radius: 18px;
-  --shadow: 0 14px 40px rgba(0,0,0,0.32);
+  --shadow: 0 14px 40px rgba(0, 0, 0, 0.32);
 }
 
-/* Styles de base utilisant le thème */
+/* Base theme */
 body {
-  font-family: var(--font-primary) !important;
-  color: var(--primary) !important;
-  background-color: var(--secondary) !important;
+  color: var(--text);
+  background-color: var(--background);
 }
 
 a {
-  color: var(--primary) !important;
-  text-decoration: none !important;
+  color: var(--text);
+  text-decoration: none;
 }
 
 a:hover {
-  color: var(--accent) !important;
-  text-decoration: underline !important;
+  color: var(--accent);
+  text-decoration: underline;
 }
 
 button {
-  background-color: var(--accent) !important;
-  color: var(--secondary) !important;
-  border: none !important;
-  padding: 0.5rem 1rem !important;
-  border-radius: 0.25rem !important;
-  cursor: pointer !important;
+  background-color: var(--accent);
+  color: #071011;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
 }
 
 button:hover {
-  opacity: 0.9 !important;
+  opacity: 0.9;
 }
 
-/* Styles pour les éléments de navigation */
+/* Navigation */
 nav ul li a {
-  color: var(--primary) !important;
+  color: var(--text);
 }
 
 nav ul li a:hover {
-  color: var(--accent) !important;
+  color: var(--accent);
 }
