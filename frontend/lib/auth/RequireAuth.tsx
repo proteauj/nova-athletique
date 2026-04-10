@@ -1,32 +1,37 @@
 'use client';
 
-import { ReactNode, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 
-type Props = {
-  children: ReactNode;
+type RequireAuthProps = {
+  children: React.ReactNode;
 };
 
-export default function RequireAuth({ children }: Props) {
-  const router = useRouter();
+export default function RequireAuth({ children }: RequireAuthProps) {
   const { isAuthenticated, loading } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     if (loading) return;
 
     if (!isAuthenticated) {
-      router.replace('/connexion');
+      const query = searchParams?.toString();
+      const redirectTo = query ? `${pathname}?${query}` : pathname;
+
+      router.replace(`/login?redirect=${encodeURIComponent(redirectTo)}`);
     }
-  }, [loading, isAuthenticated, router]);
+  }, [isAuthenticated, loading, pathname, router, searchParams]);
 
   if (loading) {
     return (
-      <section className="page-content">
-        <div className="container">
-          <div className="card">Chargement...</div>
+      <div className="container section">
+        <div className="card">
+          <p className="section-copy">Vérification de la session...</p>
         </div>
-      </section>
+      </div>
     );
   }
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/app/context/useAuth';
 
 export default function LoginPage() {
@@ -43,6 +43,13 @@ export default function LoginPage() {
             : data?.message || 'Connexion impossible.'
         );
       }
+
+      const router = useRouter();
+      const searchParams = useSearchParams();
+
+      // après login réussi :
+      const redirect = searchParams?.get('redirect');
+      router.push(redirect || '/reservation/calendrier');
 
       login(data.token, {
         clientId: data.clientId,
