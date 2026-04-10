@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 
 type RequireAuthProps = {
@@ -12,19 +12,19 @@ export default function RequireAuth({ children }: RequireAuthProps) {
   const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
     if (loading) return;
 
     if (!isAuthenticated) {
-      const query = searchParams?.toString();
-      const safePathname = pathname ?? '/reservation/calendrier';
-      const redirectTo = query ? `${safePathname}?${query}` : safePathname;
+      const fallbackPath = pathname ?? '/login';
+      const currentSearch =
+        typeof window !== 'undefined' ? window.location.search : '';
+      const redirectTo = `${fallbackPath}${currentSearch}`;
 
       router.replace(`/login?redirect=${encodeURIComponent(redirectTo)}`);
     }
-  }, [isAuthenticated, loading, pathname, router, searchParams]);
+  }, [isAuthenticated, loading, pathname, router]);
 
   if (loading) {
     return (
