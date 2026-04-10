@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import ScheduleGrid from '@/components/schedule/ScheduleGrid';
 import ScheduleMobileDay from '@/components/schedule/ScheduleMobileDay';
 import { Coach, ScheduleSlot } from '@/lib/schedule/types';
@@ -25,13 +24,18 @@ type ViewerAccess = {
   activeSubscriptions: ActiveSubscription[];
 };
 
-export default function CalendrierClient() {
-  const searchParams = useSearchParams();
+type CalendrierClientProps = {
+  mode?: string;
+};
+
+export default function CalendrierClient({
+  mode,
+}: CalendrierClientProps) {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
 
   const isTrialMode = useMemo(() => {
-    return searchParams?.get('mode') === 'essai';
-  }, [searchParams]);
+    return mode === 'essai';
+  }, [mode]);
 
   const [coaches, setCoaches] = useState<Coach[]>([]);
   const [slots, setSlots] = useState<ScheduleSlot[]>([]);

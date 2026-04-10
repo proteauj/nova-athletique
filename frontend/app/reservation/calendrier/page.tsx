@@ -1,10 +1,14 @@
-import { Suspense } from 'react';
 import CalendrierClient from './CalendrierClient';
 
-export default function CalendrierPage() {
-  return (
-    <Suspense fallback={<div className="container section">Chargement...</div>}>
-      <CalendrierClient />
-    </Suspense>
-  );
+type PageProps = {
+  searchParams?: Promise<{
+    mode?: string;
+  }>;
+};
+
+export default async function CalendrierPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const mode = params?.mode;
+
+  return <CalendrierClient mode={mode} />;
 }
