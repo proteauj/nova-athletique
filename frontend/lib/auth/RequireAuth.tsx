@@ -19,7 +19,8 @@ export default function RequireAuth({ children }: RequireAuthProps) {
 
     if (!isAuthenticated) {
       const query = searchParams?.toString();
-      const redirectTo = query ? `${pathname}?${query}` : pathname;
+      const safePathname = pathname ?? '/reservation/calendrier';
+      const redirectTo = query ? `${safePathname}?${query}` : safePathname;
 
       router.replace(`/login?redirect=${encodeURIComponent(redirectTo)}`);
     }
