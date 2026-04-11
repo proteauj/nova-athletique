@@ -50,7 +50,7 @@ export async function POST(req: Request) {
 
     if (!entry.priceId) {
       return Response.json(
-        { error: `Price ID manquant pour ${planId}` },
+        { error: `Price  ${entry.priceId} ID manquant pour ${planId}` },
         { status: 400 }
       );
     }
