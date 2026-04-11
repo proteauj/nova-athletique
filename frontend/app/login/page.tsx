@@ -89,7 +89,7 @@ export default function LoginPage() {
             gap: 12
           }}
         >
-          <h1>Connexion</h1>
+          <h1>Connexion 123 </h1>
 
           <p className="section-copy">
             Connectez-vous pour réserver vos cours et gérer votre abonnement.
