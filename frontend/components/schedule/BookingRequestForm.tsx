@@ -46,7 +46,11 @@ export default function BookingRequestForm({ coach, slot, onClose }: Props) {
       const start = buildDateFromDayAndTime(slot.day, slot.start);
       const end = buildDateFromDayAndTime(slot.day, slot.end);
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+      if (!apiUrl) {
+        throw new Error('NEXT_PUBLIC_API_URL est manquante.');
+      }
 
       const response = await fetch(`${apiUrl}/api/BookingRequests`, {
         method: "POST",

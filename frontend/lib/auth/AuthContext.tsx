@@ -94,7 +94,11 @@ export function AuthProvider({ children }: Props) {
     }
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+      if (!apiUrl) {
+        throw new Error('NEXT_PUBLIC_API_URL est manquante.');
+      }
 
       const response = await fetch(`${apiUrl}/api/auth/me`, {
         headers: {
