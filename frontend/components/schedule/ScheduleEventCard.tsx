@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Coach, ScheduleSlot } from '@/lib/schedule/types';
 import BookingRequestForm from '@/components/schedule/BookingRequestForm';
 import ActionFeedbackModal from '@/components/ui/ActionFeedbackModal';
-import { useAuth } from '@/app/context/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 
 type ActiveSubscription = {
   id: string;

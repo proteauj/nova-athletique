@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuth } from '@/app/context/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login } = useAuth();
 
   const [email, setEmail] = useState('');
@@ -48,25 +49,20 @@ export default function LoginPage() {
         );
       }
 
-      const router = useRouter();
-      const searchParams = useSearchParams();
-
-      // après login réussi :
-      const redirect = searchParams?.get('redirect');
-      router.push(redirect || '/reservation/calendrier');
-
-      login(data.token, {
-        clientId: data.clientId,
-        fullName: data.fullName,
-        email: data.email,
-        hasActiveSubscription: data.hasActiveSubscription,
-        remainingSessions: data.remainingSessions,
-        subscriptionType: data.subscriptionType,
-        hasUsedFreeTrial: data.hasUsedFreeTrial,
-        activeSubscriptions: data.activeSubscriptions ?? []
+      await login(data.token, {
+        clientId: data.client.id,
+        fullName: data.client.fullName,
+        email: data.client.email,
+        hasActiveSubscription: data.client.hasActiveSubscription,
+        remainingSessions: data.client.remainingSessions,
+        subscriptionType: data.client.subscriptionType,
+        hasUsedFreeTrial: data.client.hasUsedFreeTrial,
+        hasSpecializedAccess: data.client.hasSpecializedAccess,
+        activeSubscriptions: data.client.activeSubscriptions ?? []
       });
 
-      router.push('/reservation/calendrier');
+      const redirect = searchParams?.get('redirect') ?? '/reservation/calendrier';
+      router.push(redirect);
       router.refresh();
     } catch (error) {
       setError(
@@ -89,7 +85,7 @@ export default function LoginPage() {
             gap: 12
           }}
         >
-          <h1>Connexion 123 </h1>
+          <h1>Connexion 123</h1>
 
           <p className="section-copy">
             Connectez-vous pour réserver vos cours et gérer votre abonnement.

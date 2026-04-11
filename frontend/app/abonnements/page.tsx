@@ -75,7 +75,7 @@ const plans = [
   }
 ];
 
-import { useAuth } from '@/app/context/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 
 async function startCheckout(planId: string, clientEmail: string) {
   const res = await fetch('/api/create-checkout', {
