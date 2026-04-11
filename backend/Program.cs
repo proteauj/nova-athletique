@@ -77,9 +77,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
-app.Urls.Add($"http://0.0.0.0:{port}");
-
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
