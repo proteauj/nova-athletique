@@ -161,7 +161,11 @@ export default function ScheduleEventCard({
         return;
       }
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+      if (!apiUrl) {
+        throw new Error('NEXT_PUBLIC_API_URL est manquante.');
+      }
 
       const start = buildSlotDate(slot.day, slot.start);
       const end = buildSlotDate(slot.day, slot.end);
