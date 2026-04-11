@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NovaAthletique.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cde5cf831ba9fb34832b79c9aec53035e46ca8c2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6ebda4adf5f64b4876dd6b3ea4c10e3941d10ebe")]
 [assembly: System.Reflection.AssemblyProductAttribute("NovaAthletique.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NovaAthletique.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
