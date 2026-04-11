@@ -1,96 +1,104 @@
-import Stripe from "stripe";
+import Stripe from 'stripe';
 
-const PRICE_MAP: Record<
-  string,
-  { priceId?: string; mode: "subscription" | "payment" }
-> = {
-  "groupe-2x": {
+const secretKey = process.env.STRIPE_SECRET_KEY;
+
+if (!secretKey) {
+  throw new Error('STRIPE_SECRET_KEY est manquante');
+}
+
+const stripe = new Stripe(secretKey);
+
+const PRICE_MAP: Record<string, { priceId?: string; mode: 'subscription' | 'payment' }> = {
+  'groupe-2x': {
     priceId: process.env.STRIPE_PRICE_ID_GROUPE_2X,
-    mode: "subscription",
+    mode: 'subscription'
   },
-  "groupe-illimite": {
+  'groupe-illimite': {
     priceId: process.env.STRIPE_PRICE_ID_GROUPE_ILLIMITE,
-    mode: "subscription",
+    mode: 'subscription'
   },
-  "libre-illimite": {
+  'libre-illimite': {
     priceId: process.env.STRIPE_PRICE_ID_LIBRE_ILLIMITE,
-    mode: "subscription",
+    mode: 'subscription'
   },
-  "10-seances": {
+  '10-seances': {
     priceId: process.env.STRIPE_PRICE_ID_10_SEANCES,
-    mode: "payment",
+    mode: 'payment'
   },
-  "30-seances": {
+  '30-seances': {
     priceId: process.env.STRIPE_PRICE_ID_30_SEANCES,
-    mode: "payment",
+    mode: 'payment'
   },
-  "drop-in": {
+  'drop-in': {
     priceId: process.env.STRIPE_PRICE_ID_DROP_IN,
-    mode: "payment",
-  },
+    mode: 'payment'
+  }
 };
 
 export async function POST(req: Request) {
   try {
-    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-
-    if (!stripeSecretKey) {
-      console.error("STRIPE_SECRET_KEY manquante");
-      return Response.json(
-        { error: "Configuration Stripe incomplète." },
-        { status: 500 }
-      );
-    }
-
     const { planId, clientEmail } = await req.json();
-
-    if (!planId || typeof planId !== "string") {
-      return Response.json(
-        { error: "Plan invalide." },
-        { status: 400 }
-      );
-    }
 
     const entry = PRICE_MAP[planId];
 
-    if (!entry || !entry.priceId) {
+    if (!entry) {
       return Response.json(
-        { error: "Plan Stripe non configuré." },
+        { error: `Plan inconnu: ${planId}` },
         { status: 400 }
       );
     }
 
-    const siteUrl =
-      process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    if (!entry.priceId) {
+      return Response.json(
+        { error: `Price ID manquant pour ${planId}` },
+        { status: 400 }
+      );
+    }
 
-    const stripe = new Stripe(stripeSecretKey);
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+
+    if (!siteUrl) {
+      return Response.json(
+        { error: 'NEXT_PUBLIC_SITE_URL est manquante.' },
+        { status: 500 }
+      );
+    }
 
     const session = await stripe.checkout.sessions.create({
       mode: entry.mode,
       line_items: [
         {
           price: entry.priceId,
-          quantity: 1,
-        },
+          quantity: 1
+        }
       ],
-      customer_email:
-        typeof clientEmail === "string" && clientEmail.length > 0
-          ? clientEmail
-          : undefined,
       success_url: `${siteUrl}/abonnements?success=1&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/abonnements?cancel=1`,
       metadata: {
         planId,
-        clientEmail:
-          typeof clientEmail === "string" ? clientEmail : "",
-      },
+        clientEmail: clientEmail ?? ''
+      }
     });
 
     return Response.json({ url: session.url });
   } catch (error) {
-    console.error("Stripe checkout", error);
+    console.error('Stripe checkout error:', error);
+
+    if (error instanceof Stripe.errors.StripeError) {
+      return Response.json(
+        {
+          error: error.message,
+          type: error.type,
+          code: error.code ?? null
+        },
+        { status: 500 }
+      );
+    }
+
     return Response.json(
-      { error: "Erreur Stripe Checkout." },
+      {
+        error: error instanceof Error ? error.message : 'Erreur Stripe Checkout.'
+      },
       { status: 500 }
     );
   }
