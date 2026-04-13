@@ -43,7 +43,7 @@ export async function POST(req: Request) {
 
     if (!entry) {
       return Response.json(
-        { error: `Plan inconnu: ${planId}` },
+        { error: `Price ID manquant pour ${planId} ${entry}` },
         { status: 400 }
       );
     }
