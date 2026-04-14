@@ -10,7 +10,7 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<Client> Clients => Set<Client>();
-    public DbSet<ClientSubscription> ClientSubscriptions => Set<ClientSubscription>();
+    public DbSet<ClientSubscription> ClientSubscription => Set<ClientSubscription>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -30,5 +30,8 @@ public class AppDbContext : DbContext
         {
             entity.HasKey(s => s.Id);
         });
+
+        modelBuilder.Entity<ClientSubscription>()
+            .ToTable("ClientSubscription");
     }
 }

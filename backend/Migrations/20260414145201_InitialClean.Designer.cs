@@ -12,15 +12,15 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace NovaAthletique.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260411092243_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260414145201_InitialClean")]
+    partial class InitialClean
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.0")
+                .HasAnnotation("ProductVersion", "9.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -89,14 +89,15 @@ namespace NovaAthletique.Api.Migrations
 
                     b.HasIndex("ClientId");
 
-                    b.ToTable("ClientSubscription");
+                    b.ToTable("ClientSubscription", (string)null);
                 });
 
             modelBuilder.Entity("NovaAthletique.Api.Models.ClientSubscription", b =>
                 {
                     b.HasOne("NovaAthletique.Api.Models.Client", null)
                         .WithMany("Subscriptions")
-                        .HasForeignKey("ClientId");
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("NovaAthletique.Api.Models.Client", b =>

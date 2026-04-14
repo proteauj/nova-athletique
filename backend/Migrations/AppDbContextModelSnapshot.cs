@@ -86,7 +86,7 @@ namespace NovaAthletique.Api.Migrations
 
                     b.HasIndex("ClientId");
 
-                    b.ToTable("ClientSubscriptions");
+                    b.ToTable("ClientSubscription", (string)null);
                 });
 
             modelBuilder.Entity("NovaAthletique.Api.Models.ClientSubscription", b =>
