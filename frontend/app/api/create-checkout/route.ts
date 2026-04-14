@@ -39,6 +39,12 @@ export async function POST(req: Request) {
   try {
     const { planId, clientEmail, clientId } = await req.json();
 
+    console.log('create-checkout payload', {
+      planId,
+      clientEmail,
+      clientId
+    });
+
     const entry = PRICE_MAP[planId];
 
     if (!entry || !entry.priceId) {
@@ -79,13 +85,36 @@ export async function POST(req: Request) {
     console.log('created stripe session', {
       id: session.id,
       client_reference_id: session.client_reference_id,
-      metadata: session.metadata
+      metadata: session.metadata,
+      url: session.url
     });
-    return Response.json({ url: session.url });
+
+    if (!session.url) {
+      return Response.json(
+        { error: 'Stripe n’a pas retourné d’URL de checkout.' },
+        { status: 500 }
+      );
+    }
+
+    return Response.json({ url: session.url }, { status: 200 });
   } catch (error) {
-    console.error('Error creating checkout session', error);
+    console.error('Stripe checkout error:', error);
+
+    if (error instanceof Stripe.errors.StripeError) {
+      return Response.json(
+        {
+          error: error.message,
+          type: error.type,
+          code: error.code ?? null
+        },
+        { status: 500 }
+      );
+    }
+
     return Response.json(
-      { error: 'Une erreur est survenue lors de la création de la session de paiement.' },
+      {
+        error: error instanceof Error ? error.message : 'Erreur Stripe Checkout.'
+      },
       { status: 500 }
     );
   }
