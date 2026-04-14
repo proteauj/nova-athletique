@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 
 const plans = [
@@ -109,12 +108,13 @@ async function startCheckout(planId: string, clientId: string, clientEmail: stri
 
 export default function AbonnementsPage() {
   const { user, refreshMe } = useAuth();
-  const searchParams = useSearchParams();
   const [message, setMessage] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     const syncSubscription = async () => {
+      if (typeof window === 'undefined') return;
+
       const params = new URLSearchParams(window.location.search);
       const success = params.get('success');
       const cancel = params.get('cancel');
