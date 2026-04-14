@@ -41,14 +41,10 @@ export async function POST(req: Request) {
 
     const entry = PRICE_MAP[planId];
 
-    if (!entry) {
-      return Response.json(
-        { error: `Price ID manquant pour ${planId} ${entry}` },
-        { status: 400 }
-      );
-    }
+    console.log('PRICE MAP:', JSON.stringify(PRICE_MAP, null, 2));
+    console.log('ENTRY:', JSON.stringify(entry, null, 2));
 
-    if (!entry.priceId) {
+    if (!entry || !entry.priceId) {
       return Response.json(
         { error: `Price  ${entry.priceId} ID manquant pour ${planId}` },
         { status: 400 }
