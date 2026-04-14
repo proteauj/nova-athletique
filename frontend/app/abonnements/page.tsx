@@ -76,14 +76,23 @@ const plans = [
 ];
 
 import { useAuth } from '@/hooks/useAuth';
+type AuthUser = {
+  id: string;
+  email: string;
+};
 
-async function startCheckout(planId: string, clientEmail: string) {
+async function startCheckout(planId: string, clientId: string, clientEmail: string) {
+  console.log('create-checkout payload', { planId, clientEmail, clientId });
   const res = await fetch('/api/create-checkout', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ planId, clientEmail })
+    body: JSON.stringify({
+      planId,
+      clientEmail,
+      clientId
+    })
   });
 
   const data = await res.json();
@@ -141,15 +150,14 @@ export default function AbonnementsPage() {
                   <button
                     type="button"
                     className="button-outline"
-                    onClick={async () => {
-                      if (!user?.email) {
-                        alert('Vous devez être connecté.');
-                        return;
-                      }
-
-                      startCheckout(plan.planId, user.email);
-                      await refreshMe();
-                    }}
+                      onClick={async () => {
+                        if (!user?.clientId || !user?.email) {
+                          alert('Vous devez être connecté.');
+                          return;
+                        }
+                        console.log('user before checkout', user);
+                        await startCheckout(plan.planId, user.clientId, user.email);
+                      }}
                   >
                     Choisir ce tarif
                   </button>

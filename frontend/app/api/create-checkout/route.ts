@@ -76,25 +76,15 @@ export async function POST(req: Request) {
       }
     });
 
-    return Response.json({ url: session.url });
+    console.log('created stripe session', {
+      id: session.id,
+      client_reference_id: session.client_reference_id,
+      metadata: session.metadata
+    });
   } catch (error) {
-    console.error('Stripe checkout error:', error);
-
-    if (error instanceof Stripe.errors.StripeError) {
-      return Response.json(
-        {
-          error: error.message,
-          type: error.type,
-          code: error.code ?? null
-        },
-        { status: 500 }
-      );
-    }
-
+    console.error('Error creating checkout session', error);
     return Response.json(
-      {
-        error: error instanceof Error ? error.message : 'Erreur Stripe Checkout.'
-      },
+      { error: 'Une erreur est survenue lors de la création de la session de paiement.' },
       { status: 500 }
     );
   }

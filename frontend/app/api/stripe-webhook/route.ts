@@ -39,6 +39,10 @@ export async function POST(req: Request) {
 }
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+  console.log('webhook session values', {
+    client_reference_id: session.client_reference_id,
+    metadata: session.metadata
+  });
   const planId = session.metadata?.planId;
   const clientId = session.metadata?.clientId || session.client_reference_id;
   const clientEmail =
