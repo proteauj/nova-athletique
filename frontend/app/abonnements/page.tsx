@@ -1,5 +1,9 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
+
 const plans = [
   {
     planId: 'groupe-2x',
@@ -75,14 +79,7 @@ const plans = [
   }
 ];
 
-import { useAuth } from '@/hooks/useAuth';
-type AuthUser = {
-  id: string;
-  email: string;
-};
-
 async function startCheckout(planId: string, clientId: string, clientEmail: string) {
-  console.log('create-checkout payload', { planId, clientEmail, clientId });
   const res = await fetch('/api/create-checkout', {
     method: 'POST',
     headers: {
@@ -97,16 +94,53 @@ async function startCheckout(planId: string, clientId: string, clientEmail: stri
 
   const data = await res.json();
 
+  if (!res.ok) {
+    alert(data.error || 'Impossible de lancer Stripe.');
+    return;
+  }
+
   if (data.url) {
     window.location.href = data.url;
     return;
   }
 
-  alert(data.error || 'Impossible de lancer Stripe.');
+  alert('Impossible de lancer Stripe.');
 }
 
 export default function AbonnementsPage() {
   const { user, refreshMe } = useAuth();
+  const searchParams = useSearchParams();
+  const [message, setMessage] = useState('');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  useEffect(() => {
+    const success = searchParams.get('success');
+    const cancel = searchParams.get('cancel');
+
+    const syncSubscription = async () => {
+      if (success === '1') {
+        setMessage('Paiement confirmé. Mise à jour de votre abonnement...');
+        setIsRefreshing(true);
+
+        try {
+          await refreshMe();
+          setMessage('Paiement confirmé. Votre abonnement a été mis à jour.');
+        } catch {
+          setMessage('Paiement confirmé, mais la mise à jour de votre abonnement a échoué.');
+        } finally {
+          setIsRefreshing(false);
+        }
+
+        return;
+      }
+
+      if (cancel === '1') {
+        setMessage('Le paiement a été annulé.');
+      }
+    };
+
+    syncSubscription();
+  }, [searchParams, refreshMe]);
 
   return (
     <>
@@ -116,6 +150,45 @@ export default function AbonnementsPage() {
           <p className="section-copy">
             Choisissez l’abonnement qui correspond à vos objectifs et votre rythme.
           </p>
+
+          {message && (
+            <div
+              style={{
+                marginTop: '1rem',
+                padding: '0.9rem 1rem',
+                borderRadius: 12,
+                background: 'rgba(159,223,224,0.12)',
+                border: '1px solid rgba(159,223,224,0.28)'
+              }}
+            >
+              {message}
+            </div>
+          )}
+
+          {!!user?.hasActiveSubscription && (
+            <div
+              style={{
+                marginTop: '1rem',
+                padding: '0.9rem 1rem',
+                borderRadius: 12,
+                background: 'rgba(120, 220, 120, 0.12)',
+                border: '1px solid rgba(120, 220, 120, 0.28)'
+              }}
+            >
+              <strong>Abonnement actif :</strong>{' '}
+              {user.subscriptionType ?? 'Actif'}
+              {typeof user.remainingSessions === 'number' &&
+              user.subscriptionType?.toLowerCase() === 'sessioncard'
+                ? ` — ${user.remainingSessions} séance(s) restante(s)`
+                : ''}
+            </div>
+          )}
+
+          {isRefreshing && (
+            <p style={{ marginTop: '0.75rem' }}>
+              Synchronisation de votre profil...
+            </p>
+          )}
         </div>
       </section>
 
@@ -150,14 +223,14 @@ export default function AbonnementsPage() {
                   <button
                     type="button"
                     className="button-outline"
-                      onClick={async () => {
-                        if (!user?.clientId || !user?.email) {
-                          alert('Vous devez être connecté.');
-                          return;
-                        }
-                        console.log('user before checkout', user);
-                        await startCheckout(plan.planId, user.clientId, user.email);
-                      }}
+                    onClick={async () => {
+                      if (!user?.clientId || !user?.email) {
+                        alert('Vous devez être connecté.');
+                        return;
+                      }
+
+                      await startCheckout(plan.planId, user.clientId, user.email);
+                    }}
                   >
                     Choisir ce tarif
                   </button>

@@ -79,6 +79,11 @@ export async function POST(req: Request) {
         planId,
         clientEmail: clientEmail ?? '',
         clientId: clientId ?? ''
+      },
+      wallet_options: {
+        link: {
+          display: 'never'
+        }
       }
     });
 
