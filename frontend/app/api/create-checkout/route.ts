@@ -37,16 +37,13 @@ const PRICE_MAP: Record<string, { priceId?: string; mode: 'subscription' | 'paym
 
 export async function POST(req: Request) {
   try {
-    const { planId, clientEmail } = await req.json();
+    const { planId, clientEmail, clientId } = await req.json();
 
     const entry = PRICE_MAP[planId];
 
-    console.log('PRICE MAP:', JSON.stringify(PRICE_MAP, null, 2));
-    console.log('ENTRY:', JSON.stringify(entry, null, 2));
-
     if (!entry || !entry.priceId) {
       return Response.json(
-        { error: `Price  ${entry.priceId} ID manquant pour ${planId}` },
+        { error: `Price ID manquant pour ${planId}` },
         { status: 400 }
       );
     }
@@ -70,9 +67,12 @@ export async function POST(req: Request) {
       ],
       success_url: `${siteUrl}/abonnements?success=1&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/abonnements?cancel=1`,
+      customer_email: clientEmail ?? undefined,
+      client_reference_id: clientId ?? undefined,
       metadata: {
         planId,
-        clientEmail: clientEmail ?? ''
+        clientEmail: clientEmail ?? '',
+        clientId: clientId ?? ''
       }
     });
 
