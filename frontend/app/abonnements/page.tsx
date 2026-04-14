@@ -114,8 +114,10 @@ export default function AbonnementsPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
-    const success = searchParams?.get('success');
-    const cancel = searchParams?.get('cancel');
+    if (!searchParams) return;
+
+    const success = searchParams.get('success');
+    const cancel = searchParams.get('cancel');
 
     const syncSubscription = async () => {
       if (success === '1') {
