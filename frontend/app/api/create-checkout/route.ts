@@ -81,6 +81,7 @@ export async function POST(req: Request) {
       client_reference_id: session.client_reference_id,
       metadata: session.metadata
     });
+    return Response.json({ url: session.url });
   } catch (error) {
     console.error('Error creating checkout session', error);
     return Response.json(
