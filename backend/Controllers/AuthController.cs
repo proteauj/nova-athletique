@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using NovaAthletique.Api.Data;
 using NovaAthletique.Api.Services;
 using NovaAthletique.Api.Models;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.EntityFrameworkCore;
 
 namespace NovaAthletique.Api.Controllers;
 
