@@ -112,36 +112,39 @@ export default function AbonnementsPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
-    const syncSubscription = async () => {
-      if (typeof window === 'undefined') return;
+  const syncSubscription = async () => {
+    if (typeof window === 'undefined') return;
 
-      const params = new URLSearchParams(window.location.search);
-      const success = params.get('success');
-      const cancel = params.get('cancel');
+    const params = new URLSearchParams(window.location.search);
+    const success = params.get('success');
+    const cancel = params.get('cancel');
 
-      if (success === '1') {
-        setMessage('Paiement confirmé. Mise à jour de votre abonnement...');
-        setIsRefreshing(true);
+    if (success === '1') {
+      setMessage('Paiement confirmé. Mise à jour de votre abonnement...');
+      setIsRefreshing(true);
 
-        try {
-          await refreshMe();
-          setMessage('Paiement confirmé. Votre abonnement a été mis à jour.');
-        } catch {
-          setMessage('Paiement confirmé, mais la mise à jour de votre abonnement a échoué.');
-        } finally {
-          setIsRefreshing(false);
-        }
-
-        return;
+      try {
+        await refreshMe();
+        setMessage('Paiement confirmé. Votre abonnement a été mis à jour.');
+      } catch {
+        setMessage('Paiement confirmé, mais la mise à jour de votre abonnement a échoué.');
+      } finally {
+        setIsRefreshing(false);
+        window.history.replaceState({}, '', '/abonnements');
       }
 
-      if (cancel === '1') {
-        setMessage('Le paiement a été annulé.');
-      }
-    };
+      return;
+    }
 
-    syncSubscription();
-  }, [refreshMe]);
+    if (cancel === '1') {
+      setMessage('Le paiement a été annulé.');
+      window.history.replaceState({}, '', '/abonnements');
+    }
+  };
+
+  syncSubscription();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
 
   return (
     <>
