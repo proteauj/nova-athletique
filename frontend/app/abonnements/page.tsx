@@ -114,12 +114,11 @@ export default function AbonnementsPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
-    if (!searchParams) return;
-
-    const success = searchParams.get('success');
-    const cancel = searchParams.get('cancel');
-
     const syncSubscription = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const success = params.get('success');
+      const cancel = params.get('cancel');
+
       if (success === '1') {
         setMessage('Paiement confirmé. Mise à jour de votre abonnement...');
         setIsRefreshing(true);
@@ -142,7 +141,7 @@ export default function AbonnementsPage() {
     };
 
     syncSubscription();
-  }, [searchParams, refreshMe]);
+  }, [refreshMe]);
 
   return (
     <>
