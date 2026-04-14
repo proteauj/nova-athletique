@@ -27,62 +27,80 @@ public class SubscriptionsController : ControllerBase
     }
 
     [HttpPost("stripe-webhook")]
-    public async Task<IActionResult> CreateFromStripeWebhook([FromBody] StripeWebhookSubscriptionRequest request)
+public async Task<IActionResult> CreateFromStripeWebhook([FromBody] StripeWebhookSubscriptionRequest request)
+{
+    Console.WriteLine("=== STRIPE WEBHOOK SUBSCRIPTION START ===");
+    Console.WriteLine($"ClientId: {request.ClientId}");
+    Console.WriteLine($"ClientEmail: {request.ClientEmail}");
+    Console.WriteLine($"PlanId: {request.PlanId}");
+
+    if (!Guid.TryParse(request.ClientId, out var clientId))
     {
-        if (!Guid.TryParse(request.ClientId, out var clientId))
-        {
-            return BadRequest("clientId invalide.");
-        }
+        Console.WriteLine("clientId invalide");
+        return BadRequest("clientId invalide.");
+    }
 
-        var client = await _db.Clients
-            .Include(c => c.Subscriptions)
-            .FirstOrDefaultAsync(c => c.Id == clientId);
+    var client = await _db.Clients
+        .Include(c => c.Subscriptions)
+        .FirstOrDefaultAsync(c => c.Id == clientId);
 
-        if (client is null)
-        {
-            return NotFound("Client introuvable.");
-        }
+    if (client is null)
+    {
+        Console.WriteLine("Client introuvable");
+        return NotFound("Client introuvable.");
+    }
 
-        var now = DateTime.UtcNow;
+    Console.WriteLine($"Client trouvé: {client.Email}");
+    Console.WriteLine($"Subscriptions avant ajout: {client.Subscriptions.Count}");
 
-        var alreadyExists = client.Subscriptions.Any(s =>
-            s.IsActive &&
-            s.SubscriptionType == MapSubscriptionType(request.PlanId) &&
-            s.CurrentPeriodEndUtc >= now);
+    var now = DateTime.UtcNow;
 
-        if (alreadyExists)
-        {
-            return Ok(new
-            {
-                success = true,
-                message = "Abonnement déjà actif."
-            });
-        }
+    var mappedType = MapSubscriptionType(request.PlanId);
 
-        var subscription = new ClientSubscription
-        {
-            Id = Guid.NewGuid(),
-            SubscriptionType = MapSubscriptionType(request.PlanId),
-            IsActive = true,
-            PurchasedAtUtc = now,
-            CurrentPeriodStartUtc = now,
-            CurrentPeriodEndUtc = GetEndDate(now, request.PlanId),
-            RemainingSessions = GetRemainingSessions(request.PlanId)
-        };
+    var alreadyExists = client.Subscriptions.Any(s =>
+        s.IsActive &&
+        s.SubscriptionType == mappedType &&
+        s.CurrentPeriodEndUtc >= now);
 
-        client.Subscriptions.Add(subscription);
-
-        await _db.SaveChangesAsync();
-
+    if (alreadyExists)
+    {
+        Console.WriteLine("Abonnement déjà actif");
         return Ok(new
         {
             success = true,
-            clientId = client.Id,
-            subscriptionId = subscription.Id,
-            subscriptionType = subscription.SubscriptionType.ToString(),
-            remainingSessions = subscription.RemainingSessions
+            message = "Abonnement déjà actif."
         });
     }
+
+    var subscription = new ClientSubscription
+    {
+        Id = Guid.NewGuid(),
+        SubscriptionType = mappedType,
+        IsActive = true,
+        PurchasedAtUtc = now,
+        CurrentPeriodStartUtc = now,
+        CurrentPeriodEndUtc = GetEndDate(now, request.PlanId),
+        RemainingSessions = GetRemainingSessions(request.PlanId)
+    };
+
+    client.Subscriptions.Add(subscription);
+
+    Console.WriteLine($"Subscriptions après ajout: {client.Subscriptions.Count}");
+
+    await _db.SaveChangesAsync();
+
+    Console.WriteLine("SaveChangesAsync terminé");
+    Console.WriteLine("=== STRIPE WEBHOOK SUBSCRIPTION END ===");
+
+    return Ok(new
+    {
+        success = true,
+        clientId = client.Id,
+        subscriptionId = subscription.Id,
+        subscriptionType = subscription.SubscriptionType.ToString(),
+        remainingSessions = subscription.RemainingSessions
+    });
+}
 
     private static SubscriptionType MapSubscriptionType(string planId) =>
         planId switch
