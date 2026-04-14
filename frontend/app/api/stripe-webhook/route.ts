@@ -73,6 +73,8 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       typeof session.subscription === 'string' ? session.subscription : null,
     planId
   });
+
+  
 }
 
 async function createSubscription(data: {
@@ -89,6 +91,8 @@ async function createSubscription(data: {
     throw new Error('NEXT_PUBLIC_API_URL est manquante');
   }
 
+  console.log('Calling Nova subscription webhook with:', data);
+
   const response = await fetch(`${apiUrl}/api/subscriptions/stripe-webhook`, {
     method: 'POST',
     headers: {
@@ -97,10 +101,14 @@ async function createSubscription(data: {
     body: JSON.stringify(data)
   });
 
+  const text = await response.text();
+
+  console.log('Nova subscription webhook response status:', response.status);
+  console.log('Nova subscription webhook response body:', text);
+
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Erreur création abonnement Nova: ${errorText}`);
+    throw new Error(`Erreur création abonnement Nova: ${text}`);
   }
 
-  return response.json();
+  return text ? JSON.parse(text) : null;
 }
